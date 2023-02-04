@@ -1,11 +1,14 @@
-﻿using Catalogue.api.Utils.Response;
+﻿using AutoMapper;
+using Catalogue.api.Utils.Response;
 using Catalogue.Lib.Data;
 using Catalogue.Lib.Models.Dto;
 using Catalogue.Lib.Models.Entities;
+using Catalogue.Lib.Utils.Filters;
 using Catalogue.Lib.Utils.Helpers;
 using EFCore.BulkExtensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System;
@@ -23,14 +26,39 @@ namespace Catalogue.Lib.Services
     {
         public   Task<Response<string>> ImportWaterBodyDataAsync(IFormFile formFile);
 
+        public Task<Response<IEnumerable<FileUploadDto>>> GetUploadedWaterDetections();
+
+        public  Task<PagedResponse<WaterBodyData>> GetWaterBodyDetails([FromQuery] PaginationFilter filter,string name, string route);
+
     }
     public class WaterDetectionServices : IWaterDetectionServices
     {
         private readonly ApplicationDbContext _applicationDbContext;
-        public WaterDetectionServices(ApplicationDbContext applicationDbContext)
+        private readonly IMapper _mapper;
+        private readonly IUriService _uriService;
+
+
+        public WaterDetectionServices(ApplicationDbContext applicationDbContext,
+            IMapper mapper,
+            IUriService uriService)
         {
             _applicationDbContext = applicationDbContext;
+            _mapper = mapper;
+            _uriService = uriService;   
         }
+
+        public async Task<Response<IEnumerable<FileUploadDto>>> GetUploadedWaterDetections()
+        {
+            List<FileUpload> waterDetections = _applicationDbContext.FileUploads.ToList();
+            var dataToReturn = _mapper.Map<IEnumerable<FileUploadDto>>(waterDetections);
+            return new Response<IEnumerable<FileUploadDto>>
+            {
+                Succeeded = true,
+                Message = "sucessful",
+                Data = dataToReturn
+            };
+        }
+
         public async Task<Response<string>> ImportWaterBodyDataAsync(IFormFile formFile)
         {
 
@@ -65,13 +93,20 @@ namespace Catalogue.Lib.Services
             }
             FileUpload fileUpload = new FileUpload
             {
-                filePath = filePath
+                filePath = filePath,
+                fileName = fileName,
+                Name = ""
+               
+
+                
             };
             _applicationDbContext.FileUploads.Add(fileUpload);
             _applicationDbContext.SaveChanges();
 
             string json = File.ReadAllText(fullPath);
-                var data = JsonConvert.DeserializeObject<WaterBodyData>(json);
+            var data = JsonConvert.DeserializeObject<WaterBodyData>(json);
+            fileUpload.Name = data!.name;
+            _applicationDbContext.FileUploads.Update(fileUpload);
                 if (data != null)
                 {
                     WaterBodyDetectionData waterBodyDetectionData = new WaterBodyDetectionData();
@@ -96,7 +131,8 @@ namespace Catalogue.Lib.Services
                         }
                     });
 
-                    await _applicationDbContext.BulkInsertAsync(dataToSave);
+            //        await _applicationDbContext.BulkInsertAsync(dataToSave);
+                  await  _applicationDbContext.AddRangeAsync(dataToSave);
                     _applicationDbContext.SaveChanges();
 
                     return new Response<string>
@@ -121,5 +157,46 @@ namespace Catalogue.Lib.Services
             
 
         }
+   
+        public async Task<PagedResponse<WaterBodyData>> GetWaterBodyDetails([FromQuery] PaginationFilter filter,string name, string route)
+        {
+            filter.sortBy = string.IsNullOrEmpty(filter.sortBy) ? "Name" : filter.sortBy;
+            var validFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
+            int totalRecords = 0;
+
+            WaterBodyData pagedData = new WaterBodyData();
+
+            var result = _applicationDbContext.WaterBodyDetectionDatas.Where(x => x.name.ToLower().Contains(name.ToLower()))
+                 .Skip((validFilter.PageNumber - 1) * validFilter.PageSize).Take(validFilter.PageSize).ToList();
+            totalRecords = _applicationDbContext.WaterBodyDetectionDatas.Count();
+
+            if(result.Count > 0 )
+            {
+                pagedData = new WaterBodyData
+                {
+                    type = result[0].type,
+                    crs = JsonConvert.DeserializeObject<Crs>(result[0].crs)!,
+                    name = result[0].name,
+                    features = result.Select(x => new Feature
+                    {
+                        type = x.type,
+                        geometry = JsonConvert.DeserializeObject<Geometry>(x.featureGometry)!,
+                        properties = JsonConvert.DeserializeObject<Properties>(x.featureProperties)!
+                    }).ToList()
+
+                };
+
+                var totalPages = totalRecords / (double)validFilter.PageSize;
+                int roundedTotalPages = Convert.ToInt32(Math.Ceiling(totalPages));
+            }
+
+            var pagedReponse = PaginationHelper.CreatePagedReponse2(pagedData, validFilter, totalRecords, _uriService, route);
+
+            return pagedReponse;
+
+
+        }
+    
     }
 }
+
