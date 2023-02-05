@@ -30,6 +30,12 @@ namespace Catalogue.Lib.Services
 
         public  Task<PagedResponse<WaterBodyData>> GetWaterBodyDetails([FromQuery] PaginationFilter filter,string name, string route);
 
+        public  Task<Response<WaterBodyData>> GetWaterBodyDataByName(string name);
+
+        public  Task<Response<string>> UpdateWaterBodyVisitation(UpdateWaterBodyVisitation updateWaterBodyVisitation);
+
+        public Task<Response<string>> UpdateWaterBodyPresence(UpdateWaterBodyPresence updateWaterBodyPresence);
+
     }
     public class WaterDetectionServices : IWaterDetectionServices
     {
@@ -96,8 +102,6 @@ namespace Catalogue.Lib.Services
                 filePath = filePath,
                 fileName = fileName,
                 Name = ""
-               
-
                 
             };
             _applicationDbContext.FileUploads.Add(fileUpload);
@@ -125,7 +129,9 @@ namespace Catalogue.Lib.Services
                                 featureGometry = JsonConvert.SerializeObject(item.geometry),
                                 featureProperties = JsonConvert.SerializeObject(item.properties),
                                 featureType = JsonConvert.SerializeObject(item.type),
-                                fileId = fileUpload.Id
+                                fileId = fileUpload.Id,
+                                HasBeenVisited= false,
+                                IsWaterBodyPresent= false,
                             };
                             dataToSave.Add(waterBodyDetectionData);
                         }
@@ -180,6 +186,7 @@ namespace Catalogue.Lib.Services
                     features = result.Select(x => new Feature
                     {
                         type = x.type,
+                        WaterBodyId =x.Id,
                         geometry = JsonConvert.DeserializeObject<Geometry>(x.featureGometry)!,
                         properties = JsonConvert.DeserializeObject<Properties>(x.featureProperties)!
                     }).ToList()
@@ -196,7 +203,82 @@ namespace Catalogue.Lib.Services
 
 
         }
-    
+
+        public async Task<Response<WaterBodyData>> GetWaterBodyDataByName(string name)
+        {
+
+            WaterBodyData waterBodyData = new WaterBodyData();
+            var result = _applicationDbContext.WaterBodyDetectionDatas.Where(x => x.name.ToLower().Contains(name.ToLower())).Take(100);
+            if (result.Count() > 0)
+            {
+                var fd = result.FirstOrDefault()!;
+                waterBodyData = new WaterBodyData
+                {
+                    type = fd.type,
+                    crs = JsonConvert.DeserializeObject<Crs>(fd.crs)!,
+                    name = fd.name,
+                    features = result.Select(x => new Feature
+                    {
+                        WaterBodyId = x.Id,
+                        type = x.type,
+                        geometry = JsonConvert.DeserializeObject<Geometry>(x.featureGometry)!,
+                        properties = JsonConvert.DeserializeObject<Properties>(x.featureProperties)!
+                    }).ToList()
+
+                };
+            }
+
+            return new Response<WaterBodyData>
+            {
+                Data = waterBodyData,
+                Message = "Sucessful",
+                Succeeded = true
+            };
+
+        }
+
+        public async Task<Response<string>> UpdateWaterBodyVisitation(UpdateWaterBodyVisitation updateWaterBodyVisitation)
+        {
+            var data = _applicationDbContext.WaterBodyDetectionDatas.
+                Where(x=>x.featureProperties.Contains(updateWaterBodyVisitation.Id)).FirstOrDefault();
+
+            if(data == null)
+            {
+                throw new Exception("Water body data not valid");
+            }
+            data.HasBeenVisited = updateWaterBodyVisitation.IsVisisted;
+            _applicationDbContext.Update(data);
+            _applicationDbContext.SaveChanges();
+
+            return new Response<string>
+            {
+                Data = "",
+                Succeeded = true,
+                Message = "Water body update sucessfull"
+            };
+        }
+
+        public async Task<Response<string>> UpdateWaterBodyPresence(UpdateWaterBodyPresence updateWaterBodyPresence)
+        {
+            var data = _applicationDbContext.WaterBodyDetectionDatas.
+                Where(x => x.featureProperties.Contains(updateWaterBodyPresence.Id)).FirstOrDefault();
+
+
+            if (data == null)
+            {
+                throw new Exception("Water body data not valid");
+            }
+            data.IsWaterBodyPresent = updateWaterBodyPresence.IsWaterBodyPresent;
+            _applicationDbContext.Update(data);
+            _applicationDbContext.SaveChanges();
+
+            return new Response<string>
+            {
+                Data = "",
+                Succeeded = true,
+                Message = "Water body update sucessfull"
+            };
+        }
     }
 }
 

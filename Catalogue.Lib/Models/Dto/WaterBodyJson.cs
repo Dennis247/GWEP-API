@@ -16,6 +16,7 @@ namespace Catalogue.Lib.Models.Dto
 
     public class Feature
     {
+        public int WaterBodyId { get; set; }
         public string type { get; set; }
         public Properties properties { get; set; }
         public Geometry geometry { get; set; }
@@ -29,6 +30,7 @@ namespace Catalogue.Lib.Models.Dto
 
     public class Properties
     {
+     
         public string name { get; set; }
         public int OBJECTID { get; set; }
         public string UNIQUE_ID { get; set; }
@@ -51,6 +53,11 @@ namespace Catalogue.Lib.Models.Dto
         public string HubName { get; set; }
         public double HubDist { get; set; }
         public string Direction { get; set; }
+
+
+        //water body status
+        public bool IsWaterBodyPresent { get; set; } 
+        public bool HasBeenVisited { get; set; }
     }
 
     public class WaterBodyData
@@ -62,4 +69,16 @@ namespace Catalogue.Lib.Models.Dto
     }
 
 
+    public class UpdateWaterBodyVisitation
+    {
+        public bool IsVisisted { get; set; }
+        public string Id { get; set; }
+    }
+
+
+    public class UpdateWaterBodyPresence
+    {
+        public bool IsWaterBodyPresent { get; set; }
+        public string Id { get; set; }
+    }
 }

@@ -19,5 +19,10 @@ namespace Catalogue.Lib.Models.Entities
         public string featureGometry { get; set; }  
         public int fileId { get; set; }
 
+        //water body status
+        public bool IsWaterBodyPresent { get; set; }
+        public bool HasBeenVisited { get; set; }
+        public string UniqueId { get; set; }
+
     }
 }

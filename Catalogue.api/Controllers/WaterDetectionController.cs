@@ -42,15 +42,30 @@ namespace Catalogue.api.Controllers
         }
 
 
-     
+        [HttpGet("GetWaterBodyDataByName")]
+        public async Task<IActionResult> GetWaterBodyDataByName(string name)
+        {
+            var result = await _waterDetectionServices.GetWaterBodyDataByName(name);
+            return Ok(result);
+        }
+
+
+        [HttpPost("UpdateWaterBodyVisitation")]
+        public async Task<IActionResult> UpdateWaterBodyVisitation(UpdateWaterBodyVisitation updateWaterBodyVisitation)
+        {
+            var result = await _waterDetectionServices.UpdateWaterBodyVisitation(updateWaterBodyVisitation);
+            return Ok(result);
+        }
+
+
+        [HttpPost("UpdateWaterBodyPresence")]
+        public async Task<IActionResult> UpdateWaterBodyPresence(UpdateWaterBodyPresence updateWaterBodyPresence)
+        {
+            var result = await _waterDetectionServices.UpdateWaterBodyPresence(updateWaterBodyPresence);
+            return Ok(result);
+        }
+
+
     }
 }
 
-
-
-//flow todo
-
-
-//get files
-
-//view paginsated contenst of the file
