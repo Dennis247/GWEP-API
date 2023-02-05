@@ -20,6 +20,15 @@ namespace Catalogue.Lib.Models.Dto
         public string type { get; set; }
         public Properties properties { get; set; }
         public Geometry geometry { get; set; }
+
+
+        //extra data
+        //extra data
+        public bool IsWaterBodyPresent { get; set; }
+        public bool HasBeenVisited { get; set; }
+     
+
+
     }
 
     public class Geometry
@@ -72,13 +81,13 @@ namespace Catalogue.Lib.Models.Dto
     public class UpdateWaterBodyVisitation
     {
         public bool IsVisisted { get; set; }
-        public string Id { get; set; }
+        public int WaterBodyId { get; set; }
     }
 
 
     public class UpdateWaterBodyPresence
     {
         public bool IsWaterBodyPresent { get; set; }
-        public string Id { get; set; }
+        public int WaterBodyId { get; set; }
     }
 }

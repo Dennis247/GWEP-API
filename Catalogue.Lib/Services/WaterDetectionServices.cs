@@ -132,6 +132,7 @@ namespace Catalogue.Lib.Services
                                 fileId = fileUpload.Id,
                                 HasBeenVisited= false,
                                 IsWaterBodyPresent= false,
+                                
                             };
                             dataToSave.Add(waterBodyDetectionData);
                         }
@@ -220,6 +221,8 @@ namespace Catalogue.Lib.Services
                     features = result.Select(x => new Feature
                     {
                         WaterBodyId = x.Id,
+                        HasBeenVisited = x.HasBeenVisited,
+                        IsWaterBodyPresent = x.IsWaterBodyPresent,
                         type = x.type,
                         geometry = JsonConvert.DeserializeObject<Geometry>(x.featureGometry)!,
                         properties = JsonConvert.DeserializeObject<Properties>(x.featureProperties)!
@@ -240,7 +243,7 @@ namespace Catalogue.Lib.Services
         public async Task<Response<string>> UpdateWaterBodyVisitation(UpdateWaterBodyVisitation updateWaterBodyVisitation)
         {
             var data = _applicationDbContext.WaterBodyDetectionDatas.
-                Where(x=>x.featureProperties.Contains(updateWaterBodyVisitation.Id)).FirstOrDefault();
+                FirstOrDefault(x => x.Id == updateWaterBodyVisitation.WaterBodyId);
 
             if(data == null)
             {
@@ -261,8 +264,7 @@ namespace Catalogue.Lib.Services
         public async Task<Response<string>> UpdateWaterBodyPresence(UpdateWaterBodyPresence updateWaterBodyPresence)
         {
             var data = _applicationDbContext.WaterBodyDetectionDatas.
-                Where(x => x.featureProperties.Contains(updateWaterBodyPresence.Id)).FirstOrDefault();
-
+                  FirstOrDefault(x => x.Id == updateWaterBodyPresence.WaterBodyId);
 
             if (data == null)
             {

@@ -22,7 +22,9 @@ namespace Catalogue.Lib.Models.Entities
         //water body status
         public bool IsWaterBodyPresent { get; set; }
         public bool HasBeenVisited { get; set; }
-        public string UniqueId { get; set; }
+    //    public string UniqueId { get; set; }
+
+        
 
     }
 }
