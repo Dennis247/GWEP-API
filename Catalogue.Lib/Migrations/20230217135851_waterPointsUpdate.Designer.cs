@@ -4,6 +4,7 @@ using Catalogue.Lib.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Catalogue.Lib.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230217135851_waterPointsUpdate")]
+    partial class waterPointsUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -135,8 +137,8 @@ namespace Catalogue.Lib.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<double>("AREA_SQM")
-                        .HasColumnType("float");
+                    b.Property<decimal>("AREA_SQM")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("CONFIDENCE")
                         .IsRequired()
@@ -151,11 +153,11 @@ namespace Catalogue.Lib.Migrations
                     b.Property<bool>("IsWaterBodyPresent")
                         .HasColumnType("bit");
 
-                    b.Property<double>("LATITUDE")
-                        .HasColumnType("float");
+                    b.Property<decimal>("LATITUDE")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<double>("LONGITUDE")
-                        .HasColumnType("float");
+                    b.Property<decimal>("LONGITUDE")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("LastTimeVisisted")
                         .HasColumnType("datetime2");
@@ -177,11 +179,11 @@ namespace Catalogue.Lib.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double>("SHAPE_Area")
-                        .HasColumnType("float");
+                    b.Property<decimal>("SHAPE_Area")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<double>("SHAPE_Leng")
-                        .HasColumnType("float");
+                    b.Property<decimal>("SHAPE_Leng")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("UNIQUE_ID")
                         .IsRequired()

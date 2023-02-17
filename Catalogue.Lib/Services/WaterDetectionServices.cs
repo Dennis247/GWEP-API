@@ -97,6 +97,8 @@ namespace Catalogue.Lib.Services
             {
                 formFile.CopyTo(stream);
             }
+
+
             FileUpload fileUpload = new FileUpload
             {
                 filePath = filePath,

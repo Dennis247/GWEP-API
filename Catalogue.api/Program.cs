@@ -21,6 +21,9 @@ builder.Services.AddCors();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<IWaterDetectionServices,WaterDetectionServices>();
+builder.Services.AddTransient<IWaterBodyPointServices, WaterBodyPointServices>();
+
+
 
 
 builder.Services.AddControllers().AddJsonOptions(x =>
