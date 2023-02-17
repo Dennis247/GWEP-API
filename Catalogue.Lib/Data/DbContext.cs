@@ -27,6 +27,7 @@ public class ApplicationDbContext : DbContext
     }
     public DbSet<WaterBodyDetectionData> WaterBodyDetectionDatas { get; set; }
     public DbSet<FileUpload> FileUploads { get; set; }
+    public DbSet<DataSync> DataSyncs { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

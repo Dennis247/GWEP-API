@@ -209,7 +209,7 @@ namespace Catalogue.Lib.Services
         {
 
             WaterBodyData waterBodyData = new WaterBodyData();
-            var result = _applicationDbContext.WaterBodyDetectionDatas.Where(x => x.name.ToLower().Contains(name.ToLower())).Take(100);
+            var result = _applicationDbContext.WaterBodyDetectionDatas.Where(x => x.name.ToLower().Contains(name.ToLower())).Take(500);
             if (result.Count() > 0)
             {
                 var fd = result.FirstOrDefault()!;

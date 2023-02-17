@@ -19,12 +19,6 @@ namespace BAT.api.Data
 
     }
 
-    //Test for build pipe line
-    //Hello new fix
-    //Test fix
-    //Test for continous integration
-    //UI fix
-
 
     public class DapperDbConnection : IDapperDbConnection, IDisposable
     {

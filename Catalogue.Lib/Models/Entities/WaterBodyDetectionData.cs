@@ -24,6 +24,13 @@ namespace Catalogue.Lib.Models.Entities
         public bool HasBeenVisited { get; set; }
     //    public string UniqueId { get; set; }
 
+        public DateTime? LastTimeUpdated { get; set; }
+        public int? LastUpdatedBy { get; set; }
+        
+
+
+        
+
         
 
     }
