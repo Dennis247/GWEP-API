@@ -59,7 +59,7 @@ namespace Catalogue.Lib.Services
 
         public async Task<Response<IEnumerable<WaterBodyPointDto>>> GetAllWaterPoints()
         {
-            var allWaterPoints = _applicationDbContext.WaterBodyPoints.AsEnumerable();
+            var allWaterPoints = _applicationDbContext.WaterBodyPoints.Take(1000).AsEnumerable();
             var dataToReturn = _mapper.Map<IEnumerable<WaterBodyPointDto>>(allWaterPoints);
 
             return new Response<IEnumerable<WaterBodyPointDto>>
@@ -105,7 +105,7 @@ namespace Catalogue.Lib.Services
         public async Task<Response<List<WaterBodyPointDto>>> GetWaterBodyPointsByPhase(string phase)
         {
             WaterBodyData waterBodyData = new WaterBodyData();
-            var result = _applicationDbContext.WaterBodyPoints.Where(x => x.PHASE.ToLower().Contains(phase.ToLower())).Take(500);
+            var result = _applicationDbContext.WaterBodyPoints.Where(x => x.PHASE.ToLower().Contains(phase.ToLower()));
             var dataToReturn = _mapper.Map<List<WaterBodyPointDto>>(result);
 
             return new Response<List<WaterBodyPointDto>>

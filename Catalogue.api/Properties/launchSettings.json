@@ -17,15 +17,16 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
-    },
-    "Profile 1": {
-      "commandName": "IIS"
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json",
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
+    "iis": {
+      "applicationUrl": "http://localhost/catalogue",
+      "sslPort": 0
+    },
     "iisExpress": {
       "applicationUrl": "http://localhost:45710",
       "sslPort": 44370

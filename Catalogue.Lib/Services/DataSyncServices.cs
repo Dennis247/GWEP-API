@@ -16,6 +16,8 @@ namespace Catalogue.Lib.Services
         //push sync
         public Response<bool> SyncWaterBodyData(List<DataSyncDto> waterBodyData);
 
+        public Response<bool> WaterBodySynchronization(List<WaterBodyPointDto> syncedWaterBodyPoints);
+
     }
 
 
@@ -76,6 +78,22 @@ namespace Catalogue.Lib.Services
 
             };
 
+
+        }
+
+        public Response<bool> WaterBodySynchronization(List<WaterBodyPointDto> syncedWaterBodyPoints)
+        {
+            //cast to table data and update in the database..
+            var dataToSave = _mapper.Map<List<WaterBodyPoint>>(syncedWaterBodyPoints);
+            _applicationDbContext.UpdateRange(dataToSave);
+            _applicationDbContext.SaveChanges();
+            return new Response<bool>
+            {
+                Data = true,    
+                Message ="Synchronization sucessful",
+                Succeeded = true
+
+            };
 
         }
     }

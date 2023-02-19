@@ -23,5 +23,13 @@ namespace Catalogue.api.Controllers
             var result =  _dataSyncService.SyncWaterBodyData(waterBodyData);
             return Ok(result);
         }
+
+
+        [HttpPost("WaterBodySynchronization")]
+        public async Task<IActionResult> WaterBodySynchronization(List<WaterBodyPointDto> waterBodyData)
+        {
+            var result = _dataSyncService.WaterBodySynchronization(waterBodyData);
+            return Ok(result);
+        }
     }
 }
