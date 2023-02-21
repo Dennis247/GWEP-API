@@ -82,6 +82,17 @@ namespace Catalogue.Lib.Models.Dto
     {
         public bool IsVisisted { get; set; }
         public int WaterBodyId { get; set; }
+
+        public int AccountId { get; set; }
+    }
+
+
+    public class UpdateWaterBodyDepression
+    {
+        public string  Depression { get; set; }
+        public int WaterBodyId { get; set; }
+
+        public int AccountId { get; set; }
     }
 
 
@@ -89,5 +100,6 @@ namespace Catalogue.Lib.Models.Dto
     {
         public bool IsWaterBodyPresent { get; set; }
         public int WaterBodyId { get; set; }
+        public int AccountId { get; set; }
     }
 }

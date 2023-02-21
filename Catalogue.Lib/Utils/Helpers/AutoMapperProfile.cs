@@ -13,10 +13,11 @@ public class AutoMapperProfile : Profile
     {
         CreateMap<FileUpload, FileUploadDto>();
         CreateMap<FileUploadDto, FileUpload>();
-
-
         CreateMap<WaterBodyPointDto, WaterBodyPoint>();
         CreateMap<WaterBodyPoint, WaterBodyPointDto>();
+        CreateMap<AccountDto, Account>();
+        CreateMap<Account, AccountDto>();
+
 
     }
 

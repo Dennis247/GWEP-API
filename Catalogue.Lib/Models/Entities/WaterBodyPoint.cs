@@ -23,6 +23,7 @@ namespace Catalogue.Lib.Models.Entities
         public int? LastUpdatedBy { get; set; }
         public string? LastUpdatedByName { get; set; }
 
+        public DateTime? LastUpdatedDate { get; set; }
 
         //status for update
         public bool IsWaterBodyPresent { get; set; }
@@ -30,6 +31,14 @@ namespace Catalogue.Lib.Models.Entities
 
         //visistation status
         public DateTime? LastTimeVisisted { get; set; }  
-        public string ?LastVisistedBy { get; set; }  
+        public string? LastVisistedBy { get; set; }  
+
+        //depression 
+
+        public string? Depression { get; set; }
+
+        public bool IsAbateKnownPoint { get; set; }
+
+        
     }
 }

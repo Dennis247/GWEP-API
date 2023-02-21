@@ -14,5 +14,8 @@
         public static string underCanopyDetectionType = "Under Canopy";
         public static string openSkyDetectionType = "Open Sky";
 
+        public static string wetDepressionType = "wet";
+        public static string dryDepressionType = "dry";
+
     }
 }

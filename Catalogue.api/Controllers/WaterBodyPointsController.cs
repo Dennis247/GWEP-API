@@ -64,6 +64,8 @@ namespace Catalogue.api.Controllers
         [HttpPost("UpdateWaterBodyVisitation")]
         public async Task<IActionResult> UpdateWaterBodyVisitation(UpdateWaterBodyVisitation updateWaterBodyVisitation)
         {
+          
+
             var result = await _waterPointServices.UpdateWaterBodyVisitation(updateWaterBodyVisitation);
             return Ok(result);
         }
@@ -73,6 +75,13 @@ namespace Catalogue.api.Controllers
         public async Task<IActionResult> UpdateWaterBodyPresence(UpdateWaterBodyPresence updateWaterBodyPresence)
         {
             var result = await _waterPointServices.UpdateWaterBodyPresence(updateWaterBodyPresence);
+            return Ok(result);
+        }
+
+        [HttpPost("UpdateWaterBodyDepression")]
+        public async Task<IActionResult> UpdateWaterBodyDepression(UpdateWaterBodyDepression updateWaterBodyDepression)
+        {
+            var result = await _waterPointServices.UpdateWaterBodyDepression(updateWaterBodyDepression);
             return Ok(result);
         }
 

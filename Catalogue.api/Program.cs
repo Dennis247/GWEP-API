@@ -23,6 +23,9 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<IWaterDetectionServices,WaterDetectionServices>();
 builder.Services.AddTransient<IWaterBodyPointServices, WaterBodyPointServices>();
 builder.Services.AddTransient<IDataSyncService, DataSyncServices>();
+builder.Services.AddTransient<IAccountServices, AccountServices>();
+
+
 
 
 

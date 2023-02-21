@@ -23,6 +23,7 @@ namespace Catalogue.Lib.Models.Dto
         //Update Status
         public int? LastUpdatedBy { get; set; }
         public string? LastUpdatedByName { get; set; }
+        public DateTime? LastUpdatedDate { get; set; }
 
 
         //status for update
@@ -32,6 +33,12 @@ namespace Catalogue.Lib.Models.Dto
         //visistation status
         public DateTime? LastTimeVisisted { get; set; }
         public string? LastVisistedBy { get; set; }
+
+        public string? Depression { get; set; }
+
+        public bool IsAbateKnownPoint { get; set; }
+
+
     }
 
 

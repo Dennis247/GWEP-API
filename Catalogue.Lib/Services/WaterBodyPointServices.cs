@@ -7,7 +7,9 @@ using Catalogue.Lib.Utils.Filters;
 using Catalogue.Lib.Utils.Helpers;
 using CsvHelper;
 using CsvHelper.Configuration;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.InkML;
+using DocumentFormat.OpenXml.Spreadsheet;
 using EFCore.BulkExtensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +22,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Runtime.ConstrainedExecution;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,6 +38,8 @@ namespace Catalogue.Lib.Services
         Task<Response<string>> ImportWaterBodyPointDataAsync(IFormFile formFile);
         Task<Response<string>> UpdateWaterBodyPresence(UpdateWaterBodyPresence updateWaterBodyPresence);
         Task<Response<string>> UpdateWaterBodyVisitation(UpdateWaterBodyVisitation updateWaterBodyVisitation);
+
+        Task<Response<string>> UpdateWaterBodyDepression(UpdateWaterBodyDepression updateWaterBodyDepression);
 
         public Response<List<string>> GetWaterPointsPhases();
 
@@ -233,6 +238,7 @@ namespace Catalogue.Lib.Services
                             SHAPE_Area = item.SHAPE_Area,
                             SHAPE_Leng = item.SHAPE_Leng,
                             UNIQUE_ID = item.UNIQUE_ID,
+                            IsAbateKnownPoint = false,
                         };
                         waterBodyPointsForImport.Add(waterBodyPoint);
                     }
@@ -257,8 +263,55 @@ namespace Catalogue.Lib.Services
 
         }
 
+        public async Task<Response<string>> UpdateWaterBodyDepression(UpdateWaterBodyDepression updateWaterBodyDepression)
+        {
+            Account? user = _applicationDbContext.Accounts.FirstOrDefault(x => x.Id == updateWaterBodyDepression.AccountId);
+            if (user == null)
+            {
+                throw new AppException("User not valid");
+            }
+
+            var data = _applicationDbContext.WaterBodyPoints.
+                 FirstOrDefault(x => x.Id == updateWaterBodyDepression.WaterBodyId);
+
+            if (data == null)
+            {
+                throw new AppException("Water body data not valid");
+            }
+
+            //if(updateWaterBodyDepression.Depression == Constants.wetDepressionType 
+            //    || updateWaterBodyDepression.Depression == Constants.dryDepressionType)
+            //{
+                data.Depression = updateWaterBodyDepression.Depression;
+
+                data.LastUpdatedByName = user.FullName;
+                data.LastUpdatedBy = user.Id;
+                data.LastUpdatedDate = DateTime.UtcNow;
+
+
+                _applicationDbContext.Update(data);
+                _applicationDbContext.SaveChanges();
+
+                return new Response<string>
+                {
+                    Data = "",
+                    Succeeded = true,
+                    Message = "Water body update sucessfull"
+                };
+           // }
+          //  throw new AppException("Depression type not valid");
+
+     
+        }
+
         public async Task<Response<string>> UpdateWaterBodyPresence(UpdateWaterBodyPresence updateWaterBodyPresence)
         {
+            Account? user = _applicationDbContext.Accounts.FirstOrDefault(x => x.Id == updateWaterBodyPresence.AccountId);
+            if (user == null)
+            {
+                throw new Exception("User not valid");
+            }
+
             var data = _applicationDbContext.WaterBodyPoints.
                  FirstOrDefault(x => x.Id == updateWaterBodyPresence.WaterBodyId);
 
@@ -267,6 +320,12 @@ namespace Catalogue.Lib.Services
                 throw new Exception("Water body data not valid");
             }
             data.IsWaterBodyPresent = updateWaterBodyPresence.IsWaterBodyPresent;
+
+            data.LastUpdatedByName = user.FullName;
+            data.LastUpdatedBy = user.Id;
+            data.LastUpdatedDate = DateTime.UtcNow;
+          
+
             _applicationDbContext.Update(data);
             _applicationDbContext.SaveChanges();
 
@@ -280,6 +339,14 @@ namespace Catalogue.Lib.Services
 
         public async Task<Response<string>> UpdateWaterBodyVisitation(UpdateWaterBodyVisitation updateWaterBodyVisitation)
         {
+
+            Account user = _applicationDbContext.Accounts.FirstOrDefault(x => x.Id == updateWaterBodyVisitation.AccountId);
+            if(user == null)
+            {
+                throw new Exception("User not valid");
+            }
+
+
             var data = _applicationDbContext.WaterBodyPoints.
                 FirstOrDefault(x => x.Id == updateWaterBodyVisitation.WaterBodyId);
 
@@ -288,6 +355,14 @@ namespace Catalogue.Lib.Services
                 throw new Exception("Water body data not valid");
             }
             data.HasBeenVisited = updateWaterBodyVisitation.IsVisisted;
+          
+            data.LastUpdatedByName = user.FullName;
+            data.LastUpdatedBy = user.Id;
+            data.LastUpdatedDate = DateTime.UtcNow;
+            data.LastVisistedBy = user.FullName;
+            data.LastTimeVisisted= DateTime.UtcNow;
+
+
             _applicationDbContext.Update(data);
             _applicationDbContext.SaveChanges();
 
