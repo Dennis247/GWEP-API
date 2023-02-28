@@ -38,7 +38,20 @@ namespace Catalogue.Lib.Models.Dto
 
         public bool IsAbateKnownPoint { get; set; }
 
+        public string? WaterBodyStatus { get; set; }
 
+
+    }
+
+
+    //update water body status
+
+    public class UpdateWaterBodyStatus
+    {
+
+        public int WaterBodyId { get; set; }
+        public int AccountId { get; set; }
+        public string WaterBodyStatus { get; set; }
     }
 
 

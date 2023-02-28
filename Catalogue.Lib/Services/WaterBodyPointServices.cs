@@ -44,6 +44,8 @@ namespace Catalogue.Lib.Services
         public Response<List<string>> GetWaterPointsPhases();
 
         Task<Response<IEnumerable<WaterBodyPointDto>>> GetAllWaterPoints();
+
+        Task<Response<string>> UpdateWaterBodyStatus(UpdateWaterBodyStatus updateWaterBodyStatus);
     }
 
     public class WaterBodyPointServices : IWaterBodyPointServices
@@ -64,7 +66,11 @@ namespace Catalogue.Lib.Services
 
         public async Task<Response<IEnumerable<WaterBodyPointDto>>> GetAllWaterPoints()
         {
-            var allWaterPoints = _applicationDbContext.WaterBodyPoints.Take(1000).AsEnumerable();
+            var allWaterPoints = _applicationDbContext.WaterBodyPoints.Take(1000).ToList();
+            var extradata = _applicationDbContext.WaterBodyPoints.Where(x => x.LONGITUDE.ToString().Contains("-90") || x.LONGITUDE.ToString().Contains("7.79581"));
+
+              allWaterPoints.AddRange(extradata);
+
             var dataToReturn = _mapper.Map<IEnumerable<WaterBodyPointDto>>(allWaterPoints);
 
             return new Response<IEnumerable<WaterBodyPointDto>>
@@ -373,6 +379,49 @@ namespace Catalogue.Lib.Services
                 Message = "Water body update sucessfull"
             };
         }
+
+
+        //update water body status
+
+
+        public async Task<Response<string>> UpdateWaterBodyStatus(UpdateWaterBodyStatus updateWaterBodyStatus)
+        {
+
+            Account user = _applicationDbContext.Accounts.FirstOrDefault(x => x.Id == updateWaterBodyStatus.AccountId);
+            if (user == null)
+            {
+                throw new Exception("User not valid");
+            }
+
+
+            var data = _applicationDbContext.WaterBodyPoints.
+                FirstOrDefault(x => x.Id == updateWaterBodyStatus.WaterBodyId);
+
+            if (data == null)
+            {
+                throw new Exception("Water body data not valid");
+            }
+            data.WaterBodyStatus = updateWaterBodyStatus.WaterBodyStatus;
+
+            data.LastUpdatedByName = user.FullName;
+            data.LastUpdatedBy = user.Id;
+            data.LastUpdatedDate = DateTime.UtcNow;
+            data.LastVisistedBy = user.FullName;
+            data.LastTimeVisisted = DateTime.UtcNow;
+
+
+            _applicationDbContext.Update(data);
+            _applicationDbContext.SaveChanges();
+
+            return new Response<string>
+            {
+                Data = "",
+                Succeeded = true,
+                Message = "Water body status update sucessfull"
+            };
+        }
+
+
     }
 }
 

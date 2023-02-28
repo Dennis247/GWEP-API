@@ -17,5 +17,12 @@
         public static string wetDepressionType = "wet";
         public static string dryDepressionType = "dry";
 
+
+        //waterBody Status 
+        public static string waterBodyPresent = "Waterbody present";
+        public static string wetDepresssion = "Wet Depression";
+        public static string dryDepression = "Dry Depression";
+        public static string noWaterBody = "No Waterbody";
+
     }
 }

@@ -39,6 +39,8 @@ namespace Catalogue.Lib.Models.Entities
 
         public bool IsAbateKnownPoint { get; set; }
 
+        public string? WaterBodyStatus { get; set; }
+
         
     }
 }

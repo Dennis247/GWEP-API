@@ -86,6 +86,14 @@ namespace Catalogue.api.Controllers
         }
 
 
+        [HttpPost("UpdateWaterBodyStatus")]
+        public async Task<IActionResult> UpdateWaterBodyDepression(UpdateWaterBodyStatus updateWaterBodyStatus)
+        {
+            var result = await _waterPointServices.UpdateWaterBodyStatus(updateWaterBodyStatus);
+            return Ok(result);
+        }
+
+
     }
 }
 

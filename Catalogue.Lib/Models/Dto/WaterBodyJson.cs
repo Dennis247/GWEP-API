@@ -102,4 +102,7 @@ namespace Catalogue.Lib.Models.Dto
         public int WaterBodyId { get; set; }
         public int AccountId { get; set; }
     }
+
+
+
 }
