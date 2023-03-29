@@ -179,6 +179,12 @@ namespace Catalogue.Lib.Migrations
                     b.Property<bool>("HasBeenVisited")
                         .HasColumnType("bit");
 
+                    b.Property<string>("HubArea")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HubName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsAbateKnownPoint")
                         .HasColumnType("bit");
 

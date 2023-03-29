@@ -40,6 +40,9 @@ namespace Catalogue.Lib.Models.Dto
 
         public string? WaterBodyStatus { get; set; }
 
+        public string HubName { get; set; }
+        public string HubArea { get; set; }
+
 
     }
 
@@ -67,7 +70,9 @@ namespace Catalogue.Lib.Models.Dto
         public double AREA_SQM { get; set; }
         public double SHAPE_Leng { get; set; }
         public double SHAPE_Area { get; set; }
-        public string PHASE { get; set; }   
+        public string PHASE { get; set; }
+        public string HubName { get; set; }
+        public string HubArea { get; set; }
 
     }
 

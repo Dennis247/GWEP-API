@@ -27,6 +27,33 @@ namespace Catalogue.api.Controllers
 
 
 
+        [HttpPost("UploadWaterPointDataFromJsonToCSV")]
+        public async Task<IActionResult> UploadWaterPointDataFromJsonToCSV(IFormFile formFile)
+        {
+            var result = await _waterPointServices.ImportWaterBodyDataToWaterPointsTable(formFile);
+            return Ok(result);
+        }
+
+
+
+        [HttpGet("GetHubAreas")]
+        public async Task<IActionResult> GetHubAreas()
+        {
+            var result = await _waterPointServices.GetHubAreas();
+            return Ok(result);
+        }
+
+        [HttpGet("GetWaterBodyPointsByHubArea")]
+        public async Task<IActionResult> GetWaterBodyPointsByHubArea(string areaName)
+        {
+            var result = await _waterPointServices.GetWaterBodyPointsByHubArea(areaName);
+            return Ok(result);
+        }
+
+      
+
+
+
 
         [HttpGet("GetWaterBodyPointsByPhase")]
         public async Task<IActionResult> GetWaterBodyPointsByPhase(string phase)

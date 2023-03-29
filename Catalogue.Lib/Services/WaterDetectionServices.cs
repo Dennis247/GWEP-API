@@ -36,6 +36,7 @@ namespace Catalogue.Lib.Services
 
         public Task<Response<string>> UpdateWaterBodyPresence(UpdateWaterBodyPresence updateWaterBodyPresence);
 
+
     }
     public class WaterDetectionServices : IWaterDetectionServices
     {
@@ -166,7 +167,12 @@ namespace Catalogue.Lib.Services
             
 
         }
-   
+
+
+
+
+
+
         public async Task<PagedResponse<WaterBodyData>> GetWaterBodyDetails([FromQuery] PaginationFilter filter,string name, string route)
         {
             filter.sortBy = string.IsNullOrEmpty(filter.sortBy) ? "Name" : filter.sortBy;

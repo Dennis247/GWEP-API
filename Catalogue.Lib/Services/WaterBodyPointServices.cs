@@ -46,6 +46,12 @@ namespace Catalogue.Lib.Services
         Task<Response<IEnumerable<WaterBodyPointDto>>> GetAllWaterPoints();
 
         Task<Response<string>> UpdateWaterBodyStatus(UpdateWaterBodyStatus updateWaterBodyStatus);
+
+        Task<Response<string>> ImportWaterBodyDataToWaterPointsTable(IFormFile formFile);
+
+        Task<Response<IQueryable<string>>> GetHubAreas();
+
+        Task<Response<IEnumerable<WaterBodyPointDto>>> GetWaterBodyPointsByHubArea(string areaName);
     }
 
     public class WaterBodyPointServices : IWaterBodyPointServices
@@ -66,10 +72,10 @@ namespace Catalogue.Lib.Services
 
         public async Task<Response<IEnumerable<WaterBodyPointDto>>> GetAllWaterPoints()
         {
-            var allWaterPoints = _applicationDbContext.WaterBodyPoints.Take(1000).ToList();
-            var extradata = _applicationDbContext.WaterBodyPoints.Where(x => x.LONGITUDE.ToString().Contains("-90") || x.LONGITUDE.ToString().Contains("7.79581"));
+            var allWaterPoints = _applicationDbContext.WaterBodyPoints.AsAsyncEnumerable();
+            //var extradata = _applicationDbContext.WaterBodyPoints.Where(x => x.LONGITUDE.ToString().Contains("-90") || x.LONGITUDE.ToString().Contains("7.79581"));
 
-              allWaterPoints.AddRange(extradata);
+            //  allWaterPoints.AddRange(extradata);
 
             var dataToReturn = _mapper.Map<IEnumerable<WaterBodyPointDto>>(allWaterPoints);
 
@@ -269,6 +275,117 @@ namespace Catalogue.Lib.Services
 
         }
 
+
+
+        public async Task<Response<string>> ImportWaterBodyDataToWaterPointsTable(IFormFile formFile)
+        {
+
+            if (formFile == null || formFile.Length <= 0)
+            {
+                throw new AppException("File cannot be null or empty");
+            }
+
+            string fileExtension = Path.GetExtension(formFile.FileName);
+            if (!fileExtension.Contains("json"))
+            {
+                throw new AppException("File format must be in json format");
+            }
+
+            var folderName = Path.Combine("AppUploads", "WaterBodyData");
+            var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+            if (!Directory.Exists(pathToSave))
+            {
+                Directory.CreateDirectory(pathToSave);
+            }
+            var fileName = ContentDispositionHeaderValue.Parse(formFile.ContentDisposition).FileName.Trim('"');
+
+
+
+            var fullPath = Path.Combine(pathToSave, fileName);
+            var filePath = Path.Combine(folderName, fileName);
+            filePath = filePath.Replace("\\", "//");
+
+            using (var stream = new FileStream(fullPath, FileMode.OpenOrCreate))
+            {
+                formFile.CopyTo(stream);
+            }
+
+
+            FileUpload fileUpload = new FileUpload
+            {
+                filePath = filePath,
+                fileName = fileName,
+                Name = ""
+
+            };
+            _applicationDbContext.FileUploads.Add(fileUpload);
+            _applicationDbContext.SaveChanges();
+
+            string json = File.ReadAllText(fullPath);
+            var data = JsonConvert.DeserializeObject<WaterBodyData>(json);
+            fileUpload.Name = data!.name;
+            _applicationDbContext.FileUploads.Update(fileUpload);
+            if (data != null)
+            {
+                WaterBodyPoint waterBodyPoint = new WaterBodyPoint();
+                List<WaterBodyPoint> dataToSave = new List<WaterBodyPoint>();
+                var sync = new object();
+                Parallel.ForEach(data.features.AsEnumerable(), item =>
+                {
+                    lock (sync)
+                    {
+                        waterBodyPoint = new WaterBodyPoint
+                        {
+                            Created = DateTime.Now,
+                            HasBeenVisited = false,
+                            IsWaterBodyPresent = false,
+                            AREA_SQM = item.properties.AREA_SQM,
+                            CONFIDENCE = item.properties.CONFIDENCE,
+                            Depression = "",
+                            HubName = item.properties.HubName,
+                            HubArea = item.properties.HubName.Split(" ")[0],
+                            IsAbateKnownPoint = false,
+                            LATITUDE = item.properties.LATITUDE,
+                            LONGITUDE = item.properties.LONGITUDE,
+                            OBJECTID = item.properties.OBJECTID.ToString(),
+                            PHASE = item.properties.PHASE,
+                            UNIQUE_ID = item.properties.UNIQUE_ID,
+                            SHAPE_Area = item.properties.SHAPE_Area,
+                            SHAPE_Leng = item.properties.SHAPE_Length,
+
+
+                        };
+                        dataToSave.Add(waterBodyPoint);
+                    }
+                });
+
+                //        await _applicationDbContext.BulkInsertAsync(dataToSave);
+                await _applicationDbContext.AddRangeAsync(dataToSave);
+                _applicationDbContext.SaveChanges();
+
+                return new Response<string>
+                {
+                    Data = "",
+                    Message = "Data Upload Sucessful For water body point sucessful",
+                    Succeeded = true
+                };
+            }
+
+
+
+
+
+            return new Response<string>
+            {
+                Data = "",
+                Message = "Failed to upload empty data",
+                Succeeded = false
+            };
+
+
+
+        }
+
         public async Task<Response<string>> UpdateWaterBodyDepression(UpdateWaterBodyDepression updateWaterBodyDepression)
         {
             Account? user = _applicationDbContext.Accounts.FirstOrDefault(x => x.Id == updateWaterBodyDepression.AccountId);
@@ -421,7 +538,33 @@ namespace Catalogue.Lib.Services
             };
         }
 
+        public async Task<Response<IQueryable<string>>> GetHubAreas()
+        {
+            var data = _applicationDbContext.WaterBodyPoints.Where(x=>x.HubArea.Trim() != "").Select(x => x.HubArea.Trim()).Distinct();
+            data = data.OrderBy(x => x);
+            return new Response<IQueryable<string>>
+            {
+                Data = data,
+                Message = "Sucessful",
+                Succeeded = true
+            };
+        }
 
+        public async Task<Response<IEnumerable<WaterBodyPointDto>>> GetWaterBodyPointsByHubArea(string areaName)
+        {
+            var allWaterPoints = _applicationDbContext.WaterBodyPoints.Where(x => x.HubArea == areaName).AsEnumerable();
+            var dataToReturn = _mapper.Map<IEnumerable<WaterBodyPointDto>>(allWaterPoints);
+            dataToReturn = dataToReturn.Take(5000);
+
+
+            return new Response<IEnumerable<WaterBodyPointDto>>
+            {
+                Data = dataToReturn,
+                Message = "Sucessful",
+                Succeeded = true
+
+            };
+        }
     }
 }
 
