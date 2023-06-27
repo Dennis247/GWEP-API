@@ -35,6 +35,16 @@ namespace Catalogue.api.Controllers
         }
 
 
+        [HttpPost("UploadAbatePoints")]
+        public async Task<IActionResult> UploadAbatePoints(IFormFile formFile)
+        {
+            var result = await _waterPointServices.ImportAbatePoints(formFile);
+            return Ok(result);
+        }
+
+
+
+
 
         [HttpGet("GetHubAreas")]
         public async Task<IActionResult> GetHubAreas()
@@ -110,12 +120,37 @@ namespace Catalogue.api.Controllers
         {
             var result = await _waterPointServices.UpdateWaterBodyDepression(updateWaterBodyDepression);
             return Ok(result);
+
+
+
+
+
+
+
+
+
+
+
+
         }
 
 
         [HttpPost("UpdateWaterBodyStatus")]
         public async Task<IActionResult> UpdateWaterBodyDepression(UpdateWaterBodyStatus updateWaterBodyStatus)
         {
+
+
+
+
+
+
+
+
+
+
+
+
+
             var result = await _waterPointServices.UpdateWaterBodyStatus(updateWaterBodyStatus);
             return Ok(result);
         }

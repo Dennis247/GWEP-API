@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	 <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,6 +29,17 @@
 
   <ItemGroup>
     <Folder Include="AppUploads\" />
+    <Folder Include="AppUploads\AbatePoints\" />
+    <Folder Include="AppUploads\WaterBodyData\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="AppUploads\AbatePoints\Metadel_Training_Points_UTM.geojson">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="AppUploads\WaterBodyData\Metadel_Training_Points_UTM.geojson">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

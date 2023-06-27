@@ -37,6 +37,7 @@ namespace Catalogue.Lib.Models.Dto
         public string? Depression { get; set; }
 
         public bool IsAbateKnownPoint { get; set; }
+        public string? AbatePointDetails { get; set; }
 
         public string? WaterBodyStatus { get; set; }
 

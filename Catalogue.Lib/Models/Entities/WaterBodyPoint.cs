@@ -43,6 +43,12 @@ namespace Catalogue.Lib.Models.Entities
 
         public string? WaterBodyStatus { get; set; }
 
-        
+        public string? AbatePointDetails { get; set; }
+
+        //grid
+        public double? grid { get; set; }
+
+
+
     }
 }

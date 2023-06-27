@@ -67,6 +67,9 @@ namespace Catalogue.Lib.Models.Dto
         //water body status
         public bool IsWaterBodyPresent { get; set; } 
         public bool HasBeenVisited { get; set; }
+
+        //grid 
+        public double? grid { get; set; }
     }
 
     public class WaterBodyData

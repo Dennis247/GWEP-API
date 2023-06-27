@@ -22,6 +22,67 @@ namespace Catalogue.Lib.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
+            modelBuilder.Entity("Catalogue.Lib.Models.Entities.AbatePoint", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("AbateCaptain")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Kebele")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("float");
+
+                    b.Property<string>("PropertyName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Reasonsforusingwatersource")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SpecialUse")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TypeofWaterSource")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Village")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VillageCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VillageSharingWaterSource")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WaterSourceName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Woreda")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AbatePoints");
+                });
+
             modelBuilder.Entity("Catalogue.Lib.Models.Entities.Account", b =>
                 {
                     b.Property<int>("Id")
@@ -166,6 +227,9 @@ namespace Catalogue.Lib.Migrations
                     b.Property<double>("AREA_SQM")
                         .HasColumnType("float");
 
+                    b.Property<string>("AbatePointDetails")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CONFIDENCE")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -232,6 +296,9 @@ namespace Catalogue.Lib.Migrations
 
                     b.Property<string>("WaterBodyStatus")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("grid")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 

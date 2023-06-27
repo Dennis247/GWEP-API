@@ -49,6 +49,8 @@ namespace Catalogue.Lib.Services
 
         Task<Response<string>> ImportWaterBodyDataToWaterPointsTable(IFormFile formFile);
 
+        Task<Response<string>> ImportAbatePoints(IFormFile formFile);
+
         Task<Response<IQueryable<string>>> GetHubAreas();
 
         Task<Response<IEnumerable<WaterBodyPointDto>>> GetWaterBodyPointsByHubArea(string areaName);
@@ -279,6 +281,7 @@ namespace Catalogue.Lib.Services
 
         public async Task<Response<string>> ImportWaterBodyDataToWaterPointsTable(IFormFile formFile)
         {
+           
 
             if (formFile == null || formFile.Length <= 0)
             {
@@ -334,6 +337,9 @@ namespace Catalogue.Lib.Services
                 {
                     lock (sync)
                     {
+                        string hubName = item.properties.HubName;
+                   //     string hubArea = hubName.Split(" ")[0];
+
                         waterBodyPoint = new WaterBodyPoint
                         {
                             Created = DateTime.Now,
@@ -342,8 +348,8 @@ namespace Catalogue.Lib.Services
                             AREA_SQM = item.properties.AREA_SQM,
                             CONFIDENCE = item.properties.CONFIDENCE,
                             Depression = "",
-                            HubName = item.properties.HubName,
-                            HubArea = item.properties.HubName.Split(" ")[0],
+                            HubName = hubName,
+                            HubArea = $"{hubName}-{item.properties.grid}",
                             IsAbateKnownPoint = false,
                             LATITUDE = item.properties.LATITUDE,
                             LONGITUDE = item.properties.LONGITUDE,
@@ -352,7 +358,8 @@ namespace Catalogue.Lib.Services
                             UNIQUE_ID = item.properties.UNIQUE_ID,
                             SHAPE_Area = item.properties.SHAPE_Area,
                             SHAPE_Leng = item.properties.SHAPE_Length,
-
+                            AbatePointDetails = "",
+                            grid = item.properties.grid
 
                         };
                         dataToSave.Add(waterBodyPoint);
@@ -363,6 +370,15 @@ namespace Catalogue.Lib.Services
                 await _applicationDbContext.AddRangeAsync(dataToSave);
                 _applicationDbContext.SaveChanges();
 
+                try
+                {
+                    File.Delete(pathToSave);
+                }
+                catch (Exception ex)
+                {
+                }
+
+
                 return new Response<string>
                 {
                     Data = "",
@@ -370,9 +386,6 @@ namespace Catalogue.Lib.Services
                     Succeeded = true
                 };
             }
-
-
-
 
 
             return new Response<string>
@@ -385,6 +398,20 @@ namespace Catalogue.Lib.Services
 
 
         }
+
+        private string getHubName(string hubName)
+        {
+            List<string> keyImportsWord = new List<string> { "Grand Resort","Region" };
+            foreach (var item in keyImportsWord)
+            {
+                if (hubName.Contains(item))
+                {
+                    return hubName.Replace(" ","");
+                }
+            }
+            return hubName;
+        }
+
 
         public async Task<Response<string>> UpdateWaterBodyDepression(UpdateWaterBodyDepression updateWaterBodyDepression)
         {
@@ -540,7 +567,7 @@ namespace Catalogue.Lib.Services
 
         public async Task<Response<IQueryable<string>>> GetHubAreas()
         {
-            var data = _applicationDbContext.WaterBodyPoints.Where(x=>x.HubArea.Trim() != "").Select(x => x.HubArea.Trim()).Distinct();
+            var data = _applicationDbContext.WaterBodyPoints.Where(x=>!string.IsNullOrEmpty(x.HubArea) && x.IsAbateKnownPoint == false).Select(x => x.HubArea!.Trim()).Distinct();
             data = data.OrderBy(x => x);
             return new Response<IQueryable<string>>
             {
@@ -554,7 +581,7 @@ namespace Catalogue.Lib.Services
         {
             var allWaterPoints = _applicationDbContext.WaterBodyPoints.Where(x => x.HubArea == areaName).AsEnumerable();
             var dataToReturn = _mapper.Map<IEnumerable<WaterBodyPointDto>>(allWaterPoints);
-            dataToReturn = dataToReturn.Take(5000);
+         //   dataToReturn = dataToReturn.Take(5000);
 
 
             return new Response<IEnumerable<WaterBodyPointDto>>
@@ -563,6 +590,147 @@ namespace Catalogue.Lib.Services
                 Message = "Sucessful",
                 Succeeded = true
 
+            };
+        }
+
+        public async Task<Response<string>> ImportAbatePoints(IFormFile formFile)
+        {
+            if (formFile == null || formFile.Length <= 0)
+            {
+                throw new AppException("File cannot be null or empty");
+            }
+
+            string fileExtension = Path.GetExtension(formFile.FileName);
+            if (!fileExtension.Contains("json"))
+            {
+                throw new AppException("File format must be in json format");
+            }
+
+            var folderName = Path.Combine("AppUploads", "AbatePoints");
+            var pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+            if (!Directory.Exists(pathToSave))
+            {
+                Directory.CreateDirectory(pathToSave);
+            }
+            var fileName = ContentDispositionHeaderValue.Parse(formFile.ContentDisposition).FileName.Trim('"');
+
+
+
+            var fullPath = Path.Combine(pathToSave, fileName);
+            var filePath = Path.Combine(folderName, fileName);
+            filePath = filePath.Replace("\\", "//");
+
+            using (var stream = new FileStream(fullPath, FileMode.OpenOrCreate))
+            {
+                formFile.CopyTo(stream);
+            }
+
+
+            FileUpload fileUpload = new FileUpload
+            {
+                filePath = filePath,
+                fileName = fileName,
+                Name = ""
+
+            };
+            _applicationDbContext.FileUploads.Add(fileUpload);
+            _applicationDbContext.SaveChanges();
+
+            string json = File.ReadAllText(fullPath);
+            var data = JsonConvert.DeserializeObject<AbatePointJson>(json);
+            fileUpload.Name = data!.name;
+            _applicationDbContext.FileUploads.Update(fileUpload);
+            if (data != null)
+            {
+                AbatePoint abatePoint = new AbatePoint();
+                List<AbatePoint> dataToSave = new List<AbatePoint>();
+
+
+                WaterBodyPoint waterBodyPoint = new WaterBodyPoint();
+                List<WaterBodyPoint> waterBodyPoints= new List<WaterBodyPoint>();
+
+
+                var sync = new object();
+                Parallel.ForEach(data.features.AsEnumerable(), item =>
+                {
+                    lock (sync)
+                    {
+                        abatePoint = new AbatePoint
+                        {
+                            Created = DateTime.Now,
+                            AbateCaptain = item.properties.AbateCaptain,
+                            Kebele = item.properties.Kebele,
+                            Latitude = item.properties.Latitude,
+                            Longitude= item.properties.Longitude,
+                            name  = data.name,
+                            PropertyName = item.properties.name,
+                            Reasonsforusingwatersource = item.properties.Reasonsforusingwatersourceegdrinkingbathingwashing,
+                            SpecialUse = item.properties.SpecialUsebyeghuntersstickcollectorsfarmersfisherman,
+                            type = data.type,
+                            TypeofWaterSource = item.properties.TypeofWaterSource,
+                            Village = item.properties.Village,
+                            VillageCode = item.properties.VillageCode,
+                            VillageSharingWaterSource = item.properties.VillageSharingWaterSource,
+                            WaterSourceName = item.properties.WaterSourceName ,
+                            Woreda = item.properties.Woreda 
+
+                        };
+                        dataToSave.Add(abatePoint);
+
+                        //add waterbody points
+                        waterBodyPoint = new WaterBodyPoint
+                        {
+                            Created = DateTime.Now,
+                            HasBeenVisited = true,
+                            IsWaterBodyPresent = true,
+                            AREA_SQM = 0.0,
+                            CONFIDENCE = "High",
+                            Depression = "",
+                            HubName = item.properties.Village,
+                            HubArea = item.properties.Village.Split(" ")[0],
+                            IsAbateKnownPoint = true,
+                            LATITUDE = item.properties.Latitude,
+                            LONGITUDE = item.properties.Longitude,
+                            OBJECTID = "",
+                            PHASE = "",
+                            UNIQUE_ID = "",
+                            SHAPE_Area = 0.0,
+                            SHAPE_Leng = 0.0,
+                            AbatePointDetails = JsonConvert.SerializeObject(abatePoint)
+                        };
+                        waterBodyPoints.Add(waterBodyPoint);
+                    }
+                });
+
+                //  await _applicationDbContext.BulkInsertAsync(dataToSave);
+                await _applicationDbContext.AddRangeAsync(dataToSave);
+                await _applicationDbContext.AddRangeAsync(waterBodyPoints);
+                _applicationDbContext.SaveChanges();
+
+                try
+                {
+                    File.Delete(pathToSave);
+                }
+                catch (Exception ex)
+                {
+                }
+
+              
+
+                return new Response<string>
+                {
+                    Data = "",
+                    Message = "Data Upload Sucessful For abate point sucessful",
+                    Succeeded = true
+                };
+            }
+
+
+            return new Response<string>
+            {
+                Data = "",
+                Message = "Failed to upload empty data",
+                Succeeded = false
             };
         }
     }

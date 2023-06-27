@@ -30,6 +30,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<DataSync> DataSyncs { get; set; }
     public DbSet<WaterBodyPoint> WaterBodyPoints { get; set; }
     public DbSet<Account> Accounts { get; set; }
+    public DbSet<AbatePoint> AbatePoints { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
